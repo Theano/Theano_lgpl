@@ -20,3 +20,6 @@ core.*
 dist
 *.DS_Store
 *.bak
+theano_lgpl/generated_version.py
+build
+Theano_lgpl.egg-info
