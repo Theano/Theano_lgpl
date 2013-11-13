@@ -30,7 +30,6 @@ script:
   - echo $PART
   - theano-nose -v
 
-
 #after_script:
 after_failure:
   - cat /home/travis/.pip/pip.log
