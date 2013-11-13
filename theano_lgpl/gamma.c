@@ -7,7 +7,18 @@
             2008.03.14 more incomplete Gamma functions added
             2008.03.15 table of factorials and logarithms added
             2008.03.17 gamma distribution functions added
+  Modification by Frederic Bastien:
+            2013.11.13 commented the gamma.h file as it is not needed.
+            2013.11.13 modification to make it work with CUDA
+
 ----------------------------------------------------------------------*/
+//For GPU support
+#ifdef __CUDACC__
+#define DEVICE __device__
+#else
+#define DEVICE
+#endif
+
 #ifndef _ISOC99_SOURCE
 #define _ISOC99_SOURCE
 #endif                          /* needed for function log1p() */
@@ -46,16 +57,16 @@
 /*----------------------------------------------------------------------
   Table of Factorials/Gamma Values
 ----------------------------------------------------------------------*/
-static double _facts[MAXFACT+1] = { 0 };
-static double _logfs[MAXFACT+1];
-static double _halfs[MAXFACT+1];
-static double _loghs[MAXFACT+1];
+DEVICE static double _facts[MAXFACT+1] = { 0 };
+DEVICE static double _logfs[MAXFACT+1];
+DEVICE static double _halfs[MAXFACT+1];
+DEVICE static double _loghs[MAXFACT+1];
 
 /*----------------------------------------------------------------------
   Functions
 ----------------------------------------------------------------------*/
 
-static void _init (void)
+DEVICE static void _init (void)
 {                               /* --- init. factorial tables */
   int    i;                     /* loop variable */
   double x = 1;                 /* factorial */
@@ -101,7 +112,7 @@ double logGamma (double n)
 
 #else /*--------------------------------------------------------------*/
 
-double logGamma (double n)
+DEVICE double logGamma (double n)
 {                               /* --- compute ln(Gamma(n))         */
   double s;                     /*           = ln((n-1)!), n \in IN */
 
@@ -147,7 +158,7 @@ For the choices gamma = 7, k = 8, and c_0 to c_8 as defined
 in the second version, the value is slightly more accurate.
 ----------------------------------------------------------------------*/
 
-double Gamma (double n)
+DEVICE double Gamma (double n)
 {                               /* --- compute Gamma(n) = (n-1)! */
   assert(n > 0);                /* check the function argument */
   if (_facts[0] <= 0) _init();  /* initialize the tables */
@@ -162,7 +173,7 @@ double Gamma (double n)
 
 /*--------------------------------------------------------------------*/
 
-static double _series (double n, double x)
+DEVICE static double _series (double n, double x)
 {                               /* --- series approximation */
   int    i;                     /* loop variable */
   double t, sum;                /* buffers */
@@ -188,7 +199,7 @@ Source: W.H. Press, S.A. Teukolsky, W.T. Vetterling, and B.P. Flannery
 The factor exp(n *log(x) -x) is added in the functions below.
 ----------------------------------------------------------------------*/
 
-static double _cfrac (double n, double x)
+DEVICE static double _cfrac (double n, double x)
 {                               /* --- continued fraction approx. */
   int    i;                     /* loop variable */
   double a, b, c, d, e, f;      /* buffers */
@@ -220,7 +231,7 @@ Source: W.H. Press, S.A. Teukolsky, W.T. Vetterling, and B.P. Flannery
 The factor exp(n *log(x) -x) is added in the functions below.
 ----------------------------------------------------------------------*/
 
-double lowerGamma (double n, double x)
+DEVICE double lowerGamma (double n, double x)
 {                               /* --- lower incomplete Gamma fn. */
   assert((n > 0) && (x > 0));   /* check the function arguments */
   return _series(n, x) *exp(n *log(x) -x);
@@ -228,7 +239,7 @@ double lowerGamma (double n, double x)
 
 /*--------------------------------------------------------------------*/
 
-double upperGamma (double n, double x)
+DEVICE double upperGamma (double n, double x)
 {                               /* --- upper incomplete Gamma fn. */
   assert((n > 0) && (x > 0));   /* check the function arguments */
   return _cfrac(n, x) *exp(n *log(x) -x);
@@ -236,7 +247,7 @@ double upperGamma (double n, double x)
 
 /*--------------------------------------------------------------------*/
 
-double GammaP (double n, double x)
+DEVICE double GammaP (double n, double x)
 {                               /* --- regularized Gamma function P */
   assert((n > 0) && (x >= 0));  /* check the function arguments */
   if (x <=  0) return 0;        /* treat x = 0 as a special case */
@@ -246,7 +257,7 @@ double GammaP (double n, double x)
 
 /*--------------------------------------------------------------------*/
 
-double GammaQ (double n, double x)
+DEVICE double GammaQ (double n, double x)
 {                               /* --- regularized Gamma function Q */
   assert((n > 0) && (x >= 0));  /* check the function arguments */
   if (x <=  0) return 1;        /* treat x = 0 as a special case */
@@ -260,7 +271,7 @@ P(k/2,x/2), where k is a natural number, is the cumulative distribution
 function (cdf) of a chi^2 distribution with k degrees of freedom.
 ----------------------------------------------------------------------*/
 
-double Gammapdf (double x, double k, double theta)
+DEVICE double Gammapdf (double x, double k, double theta)
 {                               /* --- probability density function */
   assert((k > 0) && (theta > 0));
   if (x <  0) return 0;         /* support is non-negative x */
@@ -272,7 +283,7 @@ double Gammapdf (double x, double k, double theta)
 /*--------------------------------------------------------------------*/
 #ifdef GAMMAQTL
 
-double GammaqtlP (double prob, double k, double theta)
+DEVICE double GammaqtlP (double prob, double k, double theta)
 {                               /* --- quantile of Gamma distribution */
   int    n = 0;                 /* loop variable */
   double x, f, a, d, dx, dp;    /* buffers */
@@ -304,7 +315,7 @@ double GammaqtlP (double prob, double k, double theta)
 
 /*--------------------------------------------------------------------*/
 
-double GammaqtlQ (double prob, double k, double theta)
+DEVICE double GammaqtlQ (double prob, double k, double theta)
 {                               /* --- quantile of Gamma distribution */
   int    n = 0;                 /* loop variable */
   double x, f, a, d, dx, dp;    /* buffers */
