@@ -11,4 +11,5 @@ CChi2SFTester = makeBroadcastTester(
     eps=2e-10,
     mode=mode_no_scipy,
     skip=skip_scipy,
-    name='CChi2SFTester')
+    name='CChi2SFTester',
+    check_name=False)
