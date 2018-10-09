@@ -13,7 +13,7 @@ before_install:
 install:
 # If we don't install numpy before SciPy 0.10.1, the SciPy installations fails.
   - "pip install -q numpy==1.5"
-  - "pip install scipy==0.8"
+  - "pip install scipy==0.8 parameterized"
   - "pip install git+git://github.com/Theano/Theano.git"
   - "pip install . --no-deps"
 
